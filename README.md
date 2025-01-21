@@ -31,10 +31,6 @@ Example output:
 ```
 Using device: CUDA (cuda)
 
---- fp64 Benchmark ---
-Matrix Multiplication Performance: 1.24 TFLOPS
-Memory Bandwidth: 916.13 GB/s
-
 --- fp32 Benchmark ---
 Matrix Multiplication Performance: 53.19 TFLOPS
 Memory Bandwidth: 916.60 GB/s
@@ -57,9 +53,9 @@ The script accepts the following arguments:
 | `--iterations-matmul`| `10`          | Number of iterations for GEMM benchmark.                     |
 | `--iterations-memory`| `1000`        | Number of iterations for memory bandwidth benchmark.         |
 | `--tf32`             | `False`       | Enable TensorFloat-32 (TF32) for supported CUDA GPUs.        |
-| `--types`            | `fp64,fp32,fp16`  | Data type for GEMM benchmark.                                 |
+| `--types`            | `fp32,fp16`  | Data type for GEMM benchmark.                                 |
 
-Supported data types: `fp64`, `fp32`, `fp16`, `bf16`, `int32`, `int8`. Specify multiple types separated by commas.
+Possibly supported (depends on the specific device) data types: `fp64`, `fp32`, `fp16`, `bf16`, `int32`, `int8`. Specify multiple types separated by commas.
 
 ```bash
 python benchmark.py --device cuda --matmul-size 4096 --memory-size 8192 --iterations-matmul 10 --iterations-memory 1000 --tf32 --types fp32,fp16

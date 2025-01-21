@@ -123,7 +123,7 @@ def main():
     parser.add_argument('--iterations-matmul', type=int, default=10, help='Number of iterations for compute benchmark')
     parser.add_argument('--iterations-memory', type=int, default=1000, help='Number of iterations for memory benchmark')
     parser.add_argument('--tf32', action='store_true', help='Enable TensorFloat-32 (TF32) on supported hardware')
-    parser.add_argument('--types', type=parse_types, default=['fp64','fp32', 'fp16'], help="Comma-separated list of data types to benchmark (e.g., 'fp64,fp32,fp16')")
+    parser.add_argument('--types', type=parse_types, default=['fp32', 'fp16'], help="Comma-separated list of data types to benchmark (e.g., 'fp64,fp32,fp16')")
 
 
     args = parser.parse_args()
