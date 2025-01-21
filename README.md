@@ -26,6 +26,24 @@ Simple usage:
 python benchmark.py
 ```
 
+Example output:
+
+```
+Using device: CUDA (cuda)
+
+--- fp64 Benchmark ---
+Matrix Multiplication Performance: 1.24 TFLOPS
+Memory Bandwidth: 916.13 GB/s
+
+--- fp32 Benchmark ---
+Matrix Multiplication Performance: 53.19 TFLOPS
+Memory Bandwidth: 916.60 GB/s
+
+--- fp16 Benchmark ---
+Matrix Multiplication Performance: 176.39 TFLOPS
+Memory Bandwidth: 916.18 GB/s
+```
+
 
 ### Advanced Command-Line Arguments
 
