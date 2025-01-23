@@ -32,12 +32,19 @@ Example output:
 Using device: CUDA (cuda)
 
 --- fp32 Benchmark ---
-Matrix Multiplication Performance: 53.19 TFLOPS
-Memory Bandwidth: 916.60 GB/s
+Matrix Multiplication Performance: 57.60 TFLOPS
+Memory Bandwidth: 916.80 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 51.57 FLOPS/Byte
 
 --- fp16 Benchmark ---
-Matrix Multiplication Performance: 176.39 TFLOPS
-Memory Bandwidth: 916.18 GB/s
+Matrix Multiplication Performance: 176.66 TFLOPS
+Memory Bandwidth: 917.36 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 158.26 FLOPS/Byte
+
+--- bf16 Benchmark ---
+Matrix Multiplication Performance: 176.71 TFLOPS
+Memory Bandwidth: 917.27 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 158.30 FLOPS/Byte
 ```
 
 

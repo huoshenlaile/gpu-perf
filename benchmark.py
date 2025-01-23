@@ -160,14 +160,20 @@ def main():
             tflops = benchmark_matmul(device, dtype, M=N_matmul, N=N_matmul, K=N_matmul, iterations=iterations_matmul)
             print(f"Matrix Multiplication Performance: {tflops:.2f} TFLOPS")
         except RuntimeError as e:
+            tflops = -1
             print(f"Matrix Multiplication failed on {device_name}: {e}")
         
         try:
             # Memory Bandwidth Benchmark
             bandwidth = benchmark_memory_bandwidth(device, dtype, N=N_memory, iterations=iterations_memory)
-            print(f"Memory Bandwidth: {bandwidth:.2f} GB/s\n")
+            print(f"Memory Bandwidth: {bandwidth:.2f} GB/s")
         except RuntimeError as e:
+            bandwidth = -1
             print(f"Memory Bandwidth test failed on {device_name}: {e}\n")
+
+        if (tflops != -1) and (bandwidth != -1):
+            ridge_point = tflops * bandwidth / 1024
+            print(f"Roofline Ridge Point (Arithmetic Intensity): {ridge_point:.2f} FLOPS/Byte\n")
 
 if __name__ == "__main__":
     main()
