@@ -57,7 +57,7 @@ The script accepts the following arguments:
 | `--device`           | `auto`        | Device to benchmark: `auto`, `cpu`, `cuda`, or `mps`.         |
 | `--matmul-size`      | `4096`        | Size of matrices for GEMM benchmark.                         |
 | `--memory-size`      | `8192`        | Size of tensors for memory bandwidth benchmark.              |
-| `--iterations-matmul`| `10`          | Number of iterations for GEMM benchmark.                     |
+| `--iterations-matmul`| `50`          | Number of iterations for GEMM benchmark.                     |
 | `--iterations-memory`| `1000`        | Number of iterations for memory bandwidth benchmark.         |
 | `--tf32`             | `False`       | Enable TensorFloat-32 (TF32) for supported CUDA GPUs.        |
 | `--types`            | `fp32,fp16`  | Data type for GEMM benchmark.                                 |
