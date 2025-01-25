@@ -24,7 +24,7 @@ def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=10):
     
     # Synchronize before starting timing
     if device.type == 'cuda':
-        torch.cuda.synchronize()
+        torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
         # Move to CPU to ensure MPS operations are complete
         C.cpu()
@@ -37,7 +37,7 @@ def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=10):
         C = torch.matmul(A, B)
 
     if device.type == 'cuda':
-        torch.cuda.synchronize()
+        torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
         # Move to CPU to ensure MPS operations are complete
         C.cpu()
@@ -67,7 +67,7 @@ def benchmark_memory_bandwidth(device, dtype, N=4096, iterations=100):
     
     # Synchronize before starting timing
     if device.type == 'cuda':
-        torch.cuda.synchronize()
+        torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
         # Move to CPU to ensure MPS operations are complete
         B.cpu()
@@ -81,7 +81,7 @@ def benchmark_memory_bandwidth(device, dtype, N=4096, iterations=100):
     
     # Synchronize after operations
     if device.type == 'cuda':
-        torch.cuda.synchronize()
+        torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
         # Move to CPU to ensure MPS operations are complete
         B.cpu()
@@ -112,6 +112,7 @@ def main():
         'fp16': torch.float16,
         'bf16': torch.bfloat16,
         'int32': torch.int32,
+        'int16': torch.int16,
         'int8': torch.int8,
     }
     

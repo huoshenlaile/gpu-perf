@@ -1,12 +1,12 @@
 # PyTorch GEMM TFLOPS and Memory Bandwidth Benchmark
 
-This Python script uses PyTorch to measure the performance of General Matrix Multiply (GEMM) operations in TFLOPS and memory bandwidth in GB/s on a given hardware device. It supports CPU, CUDA-enabled GPUs, and Apple MPS. This script will **not** likely reflect the peak performance of the hardware, but it can be useful to reflect the actual performance in pytorch machine learning applications.
+This Python script uses PyTorch to measure the performance of General Matrix Multiply (GEMM) operations in TFLOPS and memory bandwidth in GB/s on a given hardware device. It supports CPU, CUDA-enabled GPUs, and Apple MPS. This script will **not** likely reflect the peak performance of the hardware, but it can be useful to reflect the actual performance in PyTorch machine learning applications.
 
 ## Features
 
 - Benchmarks GEMM (matrix multiplication) performance in TFLOPS.
 - Estimates memory bandwidth in GB/s.
-- Supports multiple data types: FP64, FP32, FP16, BFLOAT16, INT32, and INT8. (depends on the specific device and PyTorch version)
+- Supports multiple data types: FP64, FP32, FP16, BFLOAT16, INT32, INT16, and INT8. (depends on the specific device and PyTorch version)
 - Works with CPU, CUDA-enabled GPUs, and Apple MPS.
 - Includes optional TensorFloat-32 (TF32) support for GPUs.
 
@@ -63,8 +63,10 @@ The script accepts the following arguments:
 | `--tf32`             | `False`       | Enable TensorFloat-32 (TF32) for supported CUDA GPUs.        |
 
 
-Possibly supported (depends on the specific device) data types: `fp64`, `fp32`, `fp16`, `bf16`, `int32`, `int8`. Specify multiple types separated by commas.
+Possibly supported (depends on the specific device and PyTorch version) data types: `fp64`, `fp32`, `fp16`, `bf16`, `int32`, `int16`, `int8`. Specify multiple types separated by commas.
+
+To test one specific CUDA device, using `--device cuda:x`, where `x` is the device index.
 
 ```bash
-python benchmark.py --device cuda --matmul-size 4096 --memory-size 8192 --iterations-matmul 10 --iterations-memory 1000 --tf32 --types fp32,fp16
+python benchmark.py --device cuda:0 --matmul-size 4096 --memory-size 8192 --iterations-matmul 50 --iterations-memory 1000 --tf32 --types fp32,fp16,bf16
 ```
