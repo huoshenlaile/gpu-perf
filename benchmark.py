@@ -117,7 +117,7 @@ def main():
     
     # parse arguments
     parser = argparse.ArgumentParser(description='Benchmarking script for matrix multiplication and memory bandwidth')
-    parser.add_argument('--device', type=str, default='auto', help='Device to benchmark (cpu, cuda, mps)', choices=['auto', 'cpu', 'cuda', 'mps'])
+    parser.add_argument('--device', type=str, default='auto', help='Device to benchmark (auto, cpu, cuda, mps)')
     parser.add_argument('--matmul-size', type=int, default=4096, help='Matrix size for compute benchmark')
     parser.add_argument('--memory-size', type=int, default=8192, help='Tensor size for memory benchmark')
     parser.add_argument('--iterations-matmul', type=int, default=50, help='Number of iterations for compute benchmark')
@@ -129,8 +129,8 @@ def main():
     args = parser.parse_args()
     if args.device == 'auto':
         device, device_name = get_device()
-    elif args.device == 'cuda':
-        device = torch.device('cuda')
+    elif args.device.lower().startswith('cuda'):
+        device = torch.device(args.device.lower())
         device_name = 'CUDA'
     elif args.device == 'mps':
         device = torch.device('mps')
