@@ -4,11 +4,11 @@ import argparse
 
 def get_device():
     if torch.cuda.is_available():
-        return torch.device('cuda'), 'CUDA'
-    elif hasattr(torch, 'has_mps') and torch.has_mps:
-        return torch.device('mps'), 'Apple MPS'
+        return torch.device('cuda')
+    elif torch.backends.mps.is_available():
+        return torch.device('mps')
     else:
-        return torch.device('cpu'), 'CPU'
+        return torch.device('cpu')
 
 def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=10):
     """
@@ -26,8 +26,7 @@ def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=10):
     if device.type == 'cuda':
         torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
-        # Move to CPU to ensure MPS operations are complete
-        C.cpu()
+        torch.mps.synchronize()
     else:
         pass  # CPU operations are synchronous
     
@@ -39,8 +38,7 @@ def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=10):
     if device.type == 'cuda':
         torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
-        # Move to CPU to ensure MPS operations are complete
-        C.cpu()
+        torch.mps.synchronize()
     else:
         pass  # CPU operations are synchronous
     
@@ -69,8 +67,7 @@ def benchmark_memory_bandwidth(device, dtype, N=4096, iterations=100):
     if device.type == 'cuda':
         torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
-        # Move to CPU to ensure MPS operations are complete
-        B.cpu()
+        torch.mps.synchronize()
     else:
         pass  # CPU operations are synchronous
     
@@ -83,8 +80,7 @@ def benchmark_memory_bandwidth(device, dtype, N=4096, iterations=100):
     if device.type == 'cuda':
         torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
-        # Move to CPU to ensure MPS operations are complete
-        B.cpu()
+        torch.mps.synchronize()
     else:
         pass  # CPU operations are synchronous
     
@@ -119,28 +115,19 @@ def main():
     # parse arguments
     parser = argparse.ArgumentParser(description='Benchmarking script for matrix multiplication and memory bandwidth')
     parser.add_argument('--device', type=str, default='auto', help='Device to benchmark (auto, cpu, cuda, mps)')
-    parser.add_argument('--matmul-size', type=int, default=4096, help='Matrix size for compute benchmark')
-    parser.add_argument('--memory-size', type=int, default=8192, help='Tensor size for memory benchmark')
-    parser.add_argument('--iterations-matmul', type=int, default=50, help='Number of iterations for compute benchmark')
-    parser.add_argument('--iterations-memory', type=int, default=1000, help='Number of iterations for memory benchmark')
+    parser.add_argument('--matmul-size', type=int, default=4096, help='Matrix size for compute benchmark, default: 4096')
+    parser.add_argument('--memory-size', type=int, default=8192, help='Tensor size for memory benchmark, default: 8192')
+    parser.add_argument('--iterations-matmul', type=int, default=50, help='Number of iterations for compute benchmark, default: 50')
+    parser.add_argument('--iterations-memory', type=int, default=1000, help='Number of iterations for memory benchmark, default: 1000')
     parser.add_argument('--tf32', action='store_true', help='Enable TensorFloat-32 (TF32) on supported hardware')
     parser.add_argument('--types', type=parse_types, default=['fp32', 'fp16'], help="Comma-separated list of data types to benchmark (e.g., 'fp64,fp32,fp16')")
 
 
     args = parser.parse_args()
     if args.device == 'auto':
-        device, device_name = get_device()
-    elif args.device.lower().startswith('cuda'):
-        device = torch.device(args.device.lower())
-        device_name = 'CUDA'
-    elif args.device == 'mps':
-        device = torch.device('mps')
-        device_name = 'Apple MPS'
-    elif args.device == 'cpu':
-        device = torch.device('cpu')
-        device_name = 'CPU'
+        device = get_device()
     else:
-        raise ValueError(f"Unknown device: {args.device}")
+        device = torch.device(args.device.lower())
     
     N_matmul = args.matmul_size
     N_memory = args.memory_size
@@ -153,7 +140,7 @@ def main():
 
     data_types = {name: supported_data_types[name] for name in args.types}
 
-    print(f"Using device: {device_name} ({device})\n")
+    print(f"Using device: {device}\n")
     for name, dtype in data_types.items():
         print(f"--- {name} Benchmark ---")
         try:
@@ -162,7 +149,7 @@ def main():
             print(f"Matrix Multiplication Performance: {tflops:.2f} TFLOPS")
         except RuntimeError as e:
             tflops = -1
-            print(f"Matrix Multiplication failed on {device_name}: {e}")
+            print(f"Matrix Multiplication failed on {device}: {e}")
         
         try:
             # Memory Bandwidth Benchmark
@@ -170,7 +157,7 @@ def main():
             print(f"Memory Bandwidth: {bandwidth:.2f} GB/s")
         except RuntimeError as e:
             bandwidth = -1
-            print(f"Memory Bandwidth test failed on {device_name}: {e}\n")
+            print(f"Memory Bandwidth test failed on {device}: {e}\n")
 
         if (tflops != -1) and (bandwidth != -1):
             ridge_point = tflops * bandwidth / 1024
