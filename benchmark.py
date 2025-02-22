@@ -10,7 +10,7 @@ def get_device():
     else:
         return torch.device('cpu')
 
-def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=10):
+def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=100):
     """
     Benchmarks matrix multiplication performance in TFLOPS.
     """
@@ -19,7 +19,7 @@ def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=10):
     B = torch.randn((K, N), dtype=dtype, device=device)
     
     # Warm-up
-    for _ in range(15):
+    for _ in range(100):
         C = torch.matmul(A, B)
     
     # Synchronize before starting timing
@@ -60,7 +60,7 @@ def benchmark_memory_bandwidth(device, dtype, N=4096, iterations=100):
     B = torch.empty_like(A)
     
     # Warm-up
-    for _ in range(10):
+    for _ in range(100):
         B.copy_(A)
     
     # Synchronize before starting timing
@@ -117,7 +117,7 @@ def main():
     parser.add_argument('--device', type=str, default='auto', help='Device to benchmark (auto, cpu, cuda, mps)')
     parser.add_argument('--matmul-size', type=int, default=4096, help='Matrix size for compute benchmark, default: 4096')
     parser.add_argument('--memory-size', type=int, default=8192, help='Tensor size for memory benchmark, default: 8192')
-    parser.add_argument('--iterations-matmul', type=int, default=50, help='Number of iterations for compute benchmark, default: 50')
+    parser.add_argument('--iterations-matmul', type=int, default=100, help='Number of iterations for compute benchmark, default: 50')
     parser.add_argument('--iterations-memory', type=int, default=1000, help='Number of iterations for memory benchmark, default: 1000')
     parser.add_argument('--tf32', action='store_true', help='Enable TensorFloat-32 (TF32) on supported hardware')
     parser.add_argument('--types', type=parse_types, default=['fp32', 'fp16'], help="Comma-separated list of data types to benchmark (e.g., 'fp64,fp32,fp16')")
