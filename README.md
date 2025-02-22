@@ -29,22 +29,27 @@ python benchmark.py
 Example output:
 
 ```
-Using device: CUDA (cuda)
+Using backend: cuda (NVIDIA GeForce RTX 5090)
+
+--- fp64 Benchmark ---
+Matrix Multiplication Performance: 1.72 TFLOPS
+Memory Bandwidth: 1520.62 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 1.16 FLOPS/Byte
 
 --- fp32 Benchmark ---
-Matrix Multiplication Performance: 57.60 TFLOPS
-Memory Bandwidth: 916.80 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 51.57 FLOPS/Byte
+Matrix Multiplication Performance: 61.73 TFLOPS
+Memory Bandwidth: 1523.53 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 41.49 FLOPS/Byte
 
 --- fp16 Benchmark ---
-Matrix Multiplication Performance: 176.66 TFLOPS
-Memory Bandwidth: 917.36 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 158.26 FLOPS/Byte
+Matrix Multiplication Performance: 185.91 TFLOPS
+Memory Bandwidth: 1518.95 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 125.33 FLOPS/Byte
 
 --- bf16 Benchmark ---
-Matrix Multiplication Performance: 176.71 TFLOPS
-Memory Bandwidth: 917.27 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 158.30 FLOPS/Byte
+Matrix Multiplication Performance: 186.47 TFLOPS
+Memory Bandwidth: 1525.92 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 125.13 FLOPS/Byte
 ```
 
 
@@ -58,7 +63,7 @@ The script accepts the following arguments:
 | `--types`            | `fp32,fp16`   | Data type for GEMM benchmark.                                |
 | `--matmul-size`      | `4096`        | Size of matrices for GEMM benchmark.                         |
 | `--memory-size`      | `8192`        | Size of tensors for memory bandwidth benchmark.              |
-| `--iterations-matmul`| `50`          | Number of iterations for GEMM benchmark.                     |
+| `--iterations-matmul`| `100`          | Number of iterations for GEMM benchmark.                     |
 | `--iterations-memory`| `1000`        | Number of iterations for memory bandwidth benchmark.         |
 | `--tf32`             | `False`       | Enable TensorFloat-32 (TF32) for supported CUDA GPUs.        |
 
@@ -68,5 +73,5 @@ Possibly supported (depends on the specific device and PyTorch version) data typ
 To test one specific CUDA device, using `--device cuda:x`, where `x` is the device index.
 
 ```bash
-python benchmark.py --device cuda:0 --matmul-size 4096 --memory-size 8192 --iterations-matmul 50 --iterations-memory 1000 --tf32 --types fp32,fp16,bf16
+python benchmark.py --device cuda:0 --types fp64,fp32,fp16,bf16
 ```
