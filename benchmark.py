@@ -10,6 +10,14 @@ def get_device():
     else:
         return torch.device('cpu')
 
+def get_device_name(device):
+    if device.type == 'cuda':
+        return torch.cuda.get_device_name(device)
+    elif device.type == 'mps':
+        return 'MPS'
+    else:
+        return 'CPU'
+
 def benchmark_matmul(device, dtype, M=4096, N=4096, K=4096, iterations=100):
     """
     Benchmarks matrix multiplication performance in TFLOPS.
@@ -140,7 +148,9 @@ def main():
 
     data_types = {name: supported_data_types[name] for name in args.types}
 
-    print(f"Using device: {device}\n")
+    device_name = get_device_name(device)
+    print(f"Using backend: {device} ({device_name})\n")
+
     for name, dtype in data_types.items():
         print(f"--- {name} Benchmark ---")
         try:
