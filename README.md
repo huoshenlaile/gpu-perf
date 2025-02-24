@@ -37,19 +37,19 @@ Memory Bandwidth: 1520.62 GB/s
 Roofline Ridge Point (Arithmetic Intensity): 1.16 FLOPS/Byte
 
 --- fp32 Benchmark ---
-Matrix Multiplication Performance: 61.73 TFLOPS
-Memory Bandwidth: 1523.53 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 41.49 FLOPS/Byte
+Matrix Multiplication Performance: 63.06 TFLOPS
+Memory Bandwidth: 1527.49 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 42.27 FLOPS/Byte
 
 --- fp16 Benchmark ---
-Matrix Multiplication Performance: 185.91 TFLOPS
-Memory Bandwidth: 1518.95 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 125.33 FLOPS/Byte
+Matrix Multiplication Performance: 237.53 TFLOPS
+Memory Bandwidth: 1529.51 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 159.03 FLOPS/Byte
 
 --- bf16 Benchmark ---
-Matrix Multiplication Performance: 186.47 TFLOPS
-Memory Bandwidth: 1525.92 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 125.13 FLOPS/Byte
+Matrix Multiplication Performance: 239.05 TFLOPS
+Memory Bandwidth: 1529.61 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 160.03 FLOPS/Byte
 ```
 
 
@@ -75,3 +75,4 @@ To test one specific CUDA device, using `--device cuda:x`, where `x` is the devi
 ```bash
 python benchmark.py --device cuda:0 --types fp64,fp32,fp16,bf16
 ```
+Notice for certain devices, you need to increase the `--matmul-size` to see the peak performance. For example, `--matmul-size 8192` is recommended for NVIDIA RTX 5090.
