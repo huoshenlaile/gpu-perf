@@ -57,15 +57,16 @@ Roofline Ridge Point (Arithmetic Intensity): 160.03 FLOPS/Byte
 
 The script accepts the following arguments:
 
-| Argument             | Default Value | Description                                                  |
-|----------------------|---------------|--------------------------------------------------------------|
-| `--device`           | `auto`        | Device to benchmark: `auto`, `cpu`, `cuda`, or `mps`.        |
-| `--types`            | `fp32,fp16`   | Data type for GEMM benchmark.                                |
-| `--matmul-size`      | `4096`        | Size of matrices for GEMM benchmark.                         |
-| `--memory-size`      | `8192`        | Size of tensors for memory bandwidth benchmark.              |
-| `--iterations-matmul`| `100`          | Number of iterations for GEMM benchmark.                     |
-| `--iterations-memory`| `1000`        | Number of iterations for memory bandwidth benchmark.         |
-| `--tf32`             | `False`       | Enable TensorFloat-32 (TF32) for supported CUDA GPUs.        |
+| Argument             | Default Value | Description                                                                 |
+|----------------------|---------------|-----------------------------------------------------------------------------|
+| `--device`           | `auto`        | Device to benchmark: `auto`, `cpu`, `cuda`, or `mps`.                       |
+| `--types`            | `fp32,fp16`   | Comma-separated list of data types to benchmark (e.g., `fp64,fp32,fp16`).   |
+| `--sec`              | `0.5`         | Time in seconds to run the benchmark.                                       |
+| `--m`                | `16384`       | Matrix size M for GEMM benchmark.                                           |
+| `--m`                | `16384`       | Matrix size N for GEMM benchmark.                                           |
+| `--k`                | `16384`       | Matrix size K for GEMM benchmark.                                           |
+| `--mem`              | `1e9`         | Tensor size for memory benchmark.                                           |
+| `--tf32`             | `False`       | Enable TensorFloat-32 (TF32) for supported CUDA GPUs.                       |
 
 
 Possibly supported (depends on the specific device and PyTorch version) data types: `fp64`, `fp32`, `fp16`, `bf16`, `int32`, `int16`, `int8`. Specify multiple types separated by commas.
@@ -75,4 +76,4 @@ To test one specific CUDA device, using `--device cuda:x`, where `x` is the devi
 ```bash
 python benchmark.py --device cuda:0 --types fp64,fp32,fp16,bf16
 ```
-Notice for certain devices, you need to increase the `--matmul-size` to see the peak performance. For example, `--matmul-size 8192` is recommended for NVIDIA RTX 5090.
+Notice for certain devices, you need to increase the `--m`, `--m`, `--k` to see the peak performance. 
