@@ -63,7 +63,7 @@ The script accepts the following arguments:
 | `--types`            | `fp32,fp16`   | Comma-separated list of data types to benchmark (e.g., `fp64,fp32,fp16`).   |
 | `--sec`              | `0.5`         | Time in seconds to run the benchmark.                                       |
 | `--m`                | `16384`       | Matrix size M for GEMM benchmark.                                           |
-| `--m`                | `16384`       | Matrix size N for GEMM benchmark.                                           |
+| `--n`                | `16384`       | Matrix size N for GEMM benchmark.                                           |
 | `--k`                | `16384`       | Matrix size K for GEMM benchmark.                                           |
 | `--mem`              | `1e9`         | Tensor size for memory benchmark.                                           |
 | `--tf32`             | `False`       | Enable TensorFloat-32 (TF32) for supported CUDA GPUs.                       |
@@ -71,9 +71,9 @@ The script accepts the following arguments:
 
 Possibly supported (depends on the specific device and PyTorch version) data types: `fp64`, `fp32`, `fp16`, `bf16`, `int32`, `int16`, `int8`. Specify multiple types separated by commas.
 
-To test one specific CUDA device, using `--device cuda:x`, where `x` is the device index.
+To test one specific CUDA device, use `--device cuda:x`, where `x` is the device index.
 
 ```bash
 python benchmark.py --device cuda:0 --types fp64,fp32,fp16,bf16
 ```
-Notice for certain devices, you need to increase the `--m`, `--m`, `--k` to see the peak performance. 
+Notice for certain devices, you need to increase the `--m`, `--n`, and `--k` to better reflect the peak performance. 
