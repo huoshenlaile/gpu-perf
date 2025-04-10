@@ -76,7 +76,7 @@ def benchmark_memory_bandwidth(device, dtype, sec=1.0, sz = 1e9):
     A = torch.randn(sz, dtype=dtype, device=device)
     B = torch.empty_like(A)
     
-    iterations = 128
+    iterations = 32
     elpased_time = 0
     
     while elpased_time < sec:
@@ -140,7 +140,7 @@ def main():
     parser.add_argument('--m', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
     parser.add_argument('--n', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
     parser.add_argument('--k', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
-    parser.add_argument('--mem', type=float, default=1e9, help='Tensor size for memory benchmark, default: 1e9')
+    parser.add_argument('--mem', type=float, default=2e9, help='Tensor size for memory benchmark, default: 1e9')
     parser.add_argument('--tf32', action='store_true', help='Enable TensorFloat-32 (TF32) on supported hardware, default: False')
     
     args = parser.parse_args()

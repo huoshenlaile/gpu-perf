@@ -33,23 +33,23 @@ Using backend: cuda (NVIDIA GeForce RTX 5090)
 
 --- fp64 Benchmark ---
 Matrix Multiplication Performance: 1.72 TFLOPS
-Memory Bandwidth: 1520.62 GB/s
+Memory Bandwidth: 1520.93 GB/s
 Roofline Ridge Point (Arithmetic Intensity): 1.16 FLOPS/Byte
 
 --- fp32 Benchmark ---
-Matrix Multiplication Performance: 63.06 TFLOPS
-Memory Bandwidth: 1527.49 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 42.27 FLOPS/Byte
+Matrix Multiplication Performance: 66.56 TFLOPS
+Memory Bandwidth: 1498.69 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 45.48 FLOPS/Byte
 
 --- fp16 Benchmark ---
-Matrix Multiplication Performance: 237.53 TFLOPS
-Memory Bandwidth: 1529.51 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 159.03 FLOPS/Byte
+Matrix Multiplication Performance: 237.11 TFLOPS
+Memory Bandwidth: 1520.20 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 159.71 FLOPS/Byte
 
 --- bf16 Benchmark ---
-Matrix Multiplication Performance: 239.05 TFLOPS
-Memory Bandwidth: 1529.61 GB/s
-Roofline Ridge Point (Arithmetic Intensity): 160.03 FLOPS/Byte
+Matrix Multiplication Performance: 241.00 TFLOPS
+Memory Bandwidth: 1520.36 GB/s
+Roofline Ridge Point (Arithmetic Intensity): 162.32 FLOPS/Byte
 ```
 
 
