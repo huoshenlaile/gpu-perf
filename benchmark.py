@@ -18,99 +18,110 @@ def get_device_name(device):
     else:
         return 'CPU'
 
+def cleanup_device(device):
+    """
+    Cleans up the device by emptying the cache.
+    """
+    if device.type == 'cuda':
+        torch.cuda.empty_cache()
+    elif device.type == 'mps':
+        torch.mps.empty_cache()
+    else:
+        pass  # No cleanup needed for CPU
+
+def synchronize_device(device):
+    """
+    Synchronizes the device to ensure all operations are complete.
+    """
+    if device.type == 'cuda':
+        torch.cuda.synchronize(device=device)
+    elif device.type == 'mps':
+        torch.mps.synchronize()
+    else:
+        pass  # No synchronization needed for CPU
+
 def benchmark_matmul(device, dtype, sec=1.0, M = 16384, N = 16384, K = 16384):
     """
     Benchmarks matrix multiplication performance in TFLOPS.
     """
     
-    
+    cleanup_device(device)
     A = torch.randn((M, K), dtype=dtype, device=device)
     B = torch.randn((K, N), dtype=dtype, device=device)
     C = torch.empty((M, N), dtype=dtype, device=device)
     
-    iterations = 0.5
-    elpased_time = 0
+    iterations = 0
+    elapsed_time = 0
     
-    while elpased_time < sec:
-        
-        iterations = int(iterations * 2)
-            
-        # Synchronize
-        if device.type == 'cuda':
-            torch.cuda.synchronize(device=device)
-        elif device.type == 'mps':
-            torch.mps.synchronize()
-        else:
-            pass
-        
-        start_time = time.time()
-        
-        for _ in range(iterations):
-            torch.matmul(A, B, out=C)
+    warmup_time = 1.0
+    
+    # Warmup device, and estimate iterations
+    start_time = time.time()
+    while elapsed_time < warmup_time:
+        synchronize_device(device)
+        torch.matmul(A, B, out=C)
+        synchronize_device(device)
+        iterations += 1
+        elapsed_time = time.time() - start_time
+    
+    required_iterations = int(sec / elapsed_time * iterations) + 1
+    # print(f"Warmup completed: {iterations} iterations in {elapsed_time:.2f} seconds")
+    # print(f"Estimated iterations for {sec} seconds: {required_iterations}")
 
-        # Synchronize
-        if device.type == 'cuda':
-            torch.cuda.synchronize(device=device)
-            torch.cuda.empty_cache()
-        elif device.type == 'mps':
-            torch.mps.synchronize()
-        else:
-            pass
-        
-        end_time = time.time()
-        elpased_time = end_time - start_time
-
-        
+    synchronize_device(device)
+    start_time = time.time()
+    for _i in range(required_iterations):
+        torch.matmul(A, B, out=C)
+    synchronize_device(device)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    
     flops_per_iteration = 2 * (M * K * N)
-    total_flops = flops_per_iteration * iterations
-    tflops = total_flops / (elpased_time * 1e12)
+    total_flops = flops_per_iteration * required_iterations
+    tflops = total_flops / (elapsed_time * 1e12)
+    cleanup_device(device)
     return tflops
 
-def benchmark_memory_bandwidth(device, dtype, sec=1.0, sz = 1e9):
+def benchmark_memory_bandwidth(device, dtype, sec=1.0, sz=1e9):
     """
     Estimates memory bandwidth in GB/s by measuring the time taken to copy large tensors.
     """
-    # Initialize large tensors
-    # calculate the number of elements reqired to reach the target size
-    sz = int(sz)
-    A = torch.randn(sz, dtype=dtype, device=device)
+    # Calculate the number of elements required to reach the target size
+    cleanup_device(device)
+    num_elements = int(sz / torch.tensor([], dtype=dtype).element_size())
+    A = torch.randn(num_elements, dtype=dtype, device=device)
     B = torch.empty_like(A)
     
-    iterations = 32
-    elpased_time = 0
+    iterations = 0
+    elapsed_time = 0
     
-    while elpased_time < sec:
-        
-        iterations = int(iterations * 2)
+    warmup_time = 1.0
     
-        # Synchronize 
-        if device.type == 'cuda':
-            torch.cuda.synchronize(device=device)
-        elif device.type == 'mps':
-            torch.mps.synchronize()
-        else:
-            pass
-        
-        start_time = time.time()
-        
-        for _ in range(iterations):
-            B.copy_(A)
-        
-        # Synchronize
-        if device.type == 'cuda':
-            torch.cuda.synchronize(device=device)
-        elif device.type == 'mps':
-            torch.mps.synchronize()
-        else:
-            pass
-        
-        end_time = time.time()
-        elpased_time = end_time - start_time
+    # Warmup device, and estimate iterations
+    start_time = time.time()
+    while elapsed_time < warmup_time:
+        synchronize_device(device)
+        B.copy_(A)
+        synchronize_device(device)
+        iterations += 1
+        elapsed_time = time.time() - start_time
+
+    required_iterations = int(sec / elapsed_time * iterations) + 1
+    # print(f"Warmup completed: {iterations} iterations in {elapsed_time:.2f} seconds")
+    # print(f"Estimated iterations for {sec} seconds: {required_iterations}")
     
-    # Calculate total bytes moved: 2 * N * N elements * element size (read and write)
-    bytes_per_copy = A.numel() * A.element_size() * 2
-    total_bytes = bytes_per_copy * iterations
-    bandwidth_gb_s = total_bytes / (elpased_time * 1e9)
+    synchronize_device(device)
+    start_time = time.time()
+    for _ in range(required_iterations):
+        B.copy_(A)
+    synchronize_device(device)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    
+    bytes_per_copy = A.numel() * A.element_size() * 2  # Read and write
+    total_bytes = bytes_per_copy * required_iterations
+    bandwidth_gb_s = total_bytes / (elapsed_time * 1073741824)
+    cleanup_device(device)
     return bandwidth_gb_s
 
 
@@ -136,11 +147,11 @@ def main():
     parser = argparse.ArgumentParser(description='Benchmarking script for matrix multiplication and memory bandwidth')
     parser.add_argument('--device', type=str, default='auto', help='Device to benchmark (auto, cpu, cuda, mps), default: auto')
     parser.add_argument('--types', type=parse_types, default=['fp32','fp16'], help='Comma-separated list of data types to benchmark (e.g., \'fp64,fp32,fp16,bf16\'), default: fp32,fp16')
-    parser.add_argument('--sec', type=float, default=0.5, help='Time in seconds to run the benchmark, default: 0.5')
+    parser.add_argument('--sec', type=float, default=1.0, help='Time in seconds to run the benchmark, default: 1.0')
     parser.add_argument('--m', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
     parser.add_argument('--n', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
     parser.add_argument('--k', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
-    parser.add_argument('--mem', type=float, default=2e9, help='Tensor size for memory benchmark, default: 1e9')
+    parser.add_argument('--mem', type=float, default=1073741824, help='Tensor size for memory benchmark, default: 1e9 (1 GB)')
     parser.add_argument('--tf32', action='store_true', help='Enable TensorFloat-32 (TF32) on supported hardware, default: False')
     
     args = parser.parse_args()
