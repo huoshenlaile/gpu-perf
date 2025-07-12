@@ -40,14 +40,18 @@ def synchronize_device(device):
     else:
         pass  # No synchronization needed for CPU
 
-def benchmark_matmul(device, dtype, sec=1.0, M = 16384, N = 16384, K = 16384):
+def benchmark_matmul(device, dtype, sec=1.0, M = 16384, N = 16384, K = 16384, all_zeros=False):
     """
     Benchmarks matrix multiplication performance in TFLOPS.
     """
     
     cleanup_device(device)
-    A = torch.randn((M, K), dtype=dtype, device=device)
-    B = torch.randn((K, N), dtype=dtype, device=device)
+    if all_zeros:
+        A = torch.zeros((M, K), dtype=dtype, device=device)
+        B = torch.zeros((K, N), dtype=dtype, device=device)
+    else:
+        A = torch.randn((M, K), dtype=dtype, device=device)
+        B = torch.randn((K, N), dtype=dtype, device=device)
     C = torch.empty((M, N), dtype=dtype, device=device)
     
     iterations = 0
@@ -82,14 +86,17 @@ def benchmark_matmul(device, dtype, sec=1.0, M = 16384, N = 16384, K = 16384):
     cleanup_device(device)
     return tflops
 
-def benchmark_memory_bandwidth(device, dtype, sec=1.0, sz=1e9):
+def benchmark_memory_bandwidth(device, dtype, sec=1.0, sz=1e9, all_zeros=False):
     """
     Estimates memory bandwidth in GB/s by measuring the time taken to copy large tensors.
     """
     # Calculate the number of elements required to reach the target size
     cleanup_device(device)
     num_elements = int(sz / torch.tensor([], dtype=dtype).element_size())
-    A = torch.randn(num_elements, dtype=dtype, device=device)
+    if all_zeros:
+        A = torch.zeros(num_elements, dtype=dtype, device=device)
+    else:
+        A = torch.randn(num_elements, dtype=dtype, device=device)
     B = torch.empty_like(A)
     
     iterations = 0
@@ -101,7 +108,7 @@ def benchmark_memory_bandwidth(device, dtype, sec=1.0, sz=1e9):
     start_time = time.time()
     while elapsed_time < warmup_time:
         synchronize_device(device)
-        B.copy_(A)
+        B.copy_(A, non_blocking=True)
         synchronize_device(device)
         iterations += 1
         elapsed_time = time.time() - start_time
@@ -113,16 +120,17 @@ def benchmark_memory_bandwidth(device, dtype, sec=1.0, sz=1e9):
     synchronize_device(device)
     start_time = time.time()
     for _ in range(required_iterations):
-        B.copy_(A)
+        B.copy_(A, non_blocking=True)
     synchronize_device(device)
     end_time = time.time()
     elapsed_time = end_time - start_time
     
     bytes_per_copy = A.numel() * A.element_size() * 2  # Read and write
     total_bytes = bytes_per_copy * required_iterations
-    bandwidth_gb_s = total_bytes / (elapsed_time * 1073741824)
+    bandwidth_gib_s = total_bytes / (elapsed_time * 1073741824)
+    bandwidth_gb_s = total_bytes / (elapsed_time * 1e9)  # Convert to GB/s
     cleanup_device(device)
-    return bandwidth_gb_s
+    return bandwidth_gib_s, bandwidth_gb_s
 
 
 def parse_types(value:str):
@@ -147,13 +155,14 @@ def main():
     parser = argparse.ArgumentParser(description='Benchmarking script for matrix multiplication and memory bandwidth')
     parser.add_argument('--device', type=str, default='auto', help='Device to benchmark (auto, cpu, cuda, mps), default: auto')
     parser.add_argument('--types', type=parse_types, default=['fp32','fp16'], help='Comma-separated list of data types to benchmark (e.g., \'fp64,fp32,fp16,bf16\'), default: fp32,fp16')
-    parser.add_argument('--sec', type=float, default=1.0, help='Time in seconds to run the benchmark, default: 1.0')
+    parser.add_argument('--sec', type=float, default=1.5, help='Time in seconds to run the benchmark, default: 1.5')
     parser.add_argument('--m', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
     parser.add_argument('--n', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
     parser.add_argument('--k', type=int, default=16384, help='Matrix size for compute benchmark, default: 16384')
-    parser.add_argument('--mem', type=float, default=1073741824, help='Tensor size for memory benchmark, default: 1e9 (1 GB)')
+    parser.add_argument('--mem', type=float, default=1073741824, help='Tensor size for memory benchmark, default: 1073741824 (1 GiB)')
     parser.add_argument('--tf32', action='store_true', help='Enable TensorFloat-32 (TF32) on supported hardware, default: False')
-    
+    parser.add_argument('--all-zeros', action='store_true', help='Use all-zero tensors for benchmarking, default: False')
+
     args = parser.parse_args()
     if args.device == 'auto':
         device = get_device()
@@ -174,8 +183,8 @@ def main():
         print(f"--- {name} Benchmark ---")
         try:
             # Compute Benchmark
-            tflops = benchmark_matmul(device, dtype, sec=args.sec, M=args.m, N=args.m, K=args.k)
-            print(f"Matrix Multiplication Performance: {tflops:.2f} TFLOPS")
+            tflops = benchmark_matmul(device, dtype, sec=args.sec, M=args.m, N=args.n, K=args.k, all_zeros=args.all_zeros)
+            print(f"Matrix Multiplication Performance:            {tflops:.2f} TFLOPS")
         except RuntimeError as e:
             tflops = -1
             print(f"Matrix Multiplication failed on {device}: {e}")
@@ -189,15 +198,15 @@ def main():
         
         try:
             # Memory Bandwidth Benchmark
-            bandwidth = benchmark_memory_bandwidth(device, dtype, sec=args.sec, sz=args.mem)
-            print(f"Memory Bandwidth: {bandwidth:.2f} GB/s")
+            bandwidth_gib_s, bandwidth_gb_s = benchmark_memory_bandwidth(device, dtype, sec=args.sec, sz=args.mem, all_zeros=args.all_zeros)
+            print(f"Memory Bandwidth:                             {bandwidth_gib_s:.2f} GiB/s ({bandwidth_gb_s:.2f} GB/s)")
         except RuntimeError as e:
-            bandwidth = -1
+            bandwidth_gib_s = -1
             print(f"Memory Bandwidth test failed on {device}: {e}\n")
 
-        if (tflops != -1) and (bandwidth != -1):
-            ridge_point = tflops * 1024 / bandwidth
-            print(f"Roofline Ridge Point (Arithmetic Intensity): {ridge_point:.2f} FLOPS/Byte\n")
+        if (tflops != -1) and (bandwidth_gib_s != -1):
+            ridge_point = tflops * 1024 / bandwidth_gib_s
+            print(f"Roofline Ridge Point (Arithmetic Intensity):  {ridge_point:.2f} FLOPS/Byte\n")
 
 if __name__ == "__main__":
     main()
