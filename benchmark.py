@@ -214,14 +214,14 @@ def main():
         
         try:
             # Memory Bandwidth Benchmark
-            bandwidth_gib_s, bandwidth_gb_s = benchmark_memory_bandwidth(device, dtype, sec=args.sec, sz=args.mem, all_zeros=args.all_zeros)
-            print(f"Memory Bandwidth:                             {bandwidth_gib_s:.2f} GiB/s ({bandwidth_gb_s:.2f} GB/s)")
+            bandwidth_gb_s, bandwidth_gib_s = benchmark_memory_bandwidth(device, dtype, sec=args.sec, sz=args.mem, all_zeros=args.all_zeros)
+            print(f"Memory Bandwidth:                             {bandwidth_gb_s:.2f} GB/s ({bandwidth_gib_s:.2f} GiB/s)")
         except RuntimeError as e:
-            bandwidth_gib_s = -1
+            bandwidth_gb_s = -1
             print(f"Memory Bandwidth test failed on {device}: {e}\n")
 
-        if (tflops != -1) and (bandwidth_gib_s != -1):
-            ridge_point = tflops * 1000 / bandwidth_gib_s
+        if (tflops != -1) and (bandwidth_gb_s != -1):
+            ridge_point = tflops * 1000 / bandwidth_gb_s
             print(f"Roofline Ridge Point (Arithmetic Intensity):  {ridge_point:.2f} FLOPS/Byte\n")
 
 if __name__ == "__main__":
