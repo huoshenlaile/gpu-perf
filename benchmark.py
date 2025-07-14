@@ -3,6 +3,10 @@ try:
     import torch_npu
 except ImportError:
     pass
+try:
+    import torch_musa
+except ImportError:
+    pass
 
 import time
 import argparse
@@ -14,6 +18,8 @@ def get_device():
         return torch.device('mps')
     elif hasattr(torch, 'npu'):
         return torch.device('npu')
+    elif hasattr(torch, 'musa'):
+        return torch.device('musa')
     else:
         return torch.device('cpu')
 
@@ -22,6 +28,8 @@ def get_device_name(device):
         return f'({torch.cuda.get_device_name(device)})'
     elif device.type == 'npu':
         return f'({torch.npu.get_device_name(device)})'
+    elif device.type == 'musa':
+        return f'({torch.musa.get_device_name(device)})'
     else:
         return ''
 
@@ -35,6 +43,8 @@ def cleanup_device(device):
         torch.mps.empty_cache()
     elif device.type == 'npu':
         torch.npu.empty_cache()
+    elif device.type == 'musa':
+        torch.musa.empty_cache()
     else:
         pass  # No cleanup needed for CPU
 
@@ -48,6 +58,8 @@ def synchronize_device(device):
         torch.mps.synchronize()
     elif device.type == 'npu':
         torch.npu.synchronize(device=device)
+    elif device.type == 'musa':
+        torch.musa.synchronize(device=device)
     else:
         pass  # No synchronization needed for CPU
 
