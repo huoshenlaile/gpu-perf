@@ -221,7 +221,7 @@ def main():
             print(f"Memory Bandwidth test failed on {device}: {e}\n")
 
         if (tflops != -1) and (bandwidth_gib_s != -1):
-            ridge_point = tflops * 1024 / bandwidth_gib_s
+            ridge_point = tflops * 1000 / bandwidth_gib_s
             print(f"Roofline Ridge Point (Arithmetic Intensity):  {ridge_point:.2f} FLOPS/Byte\n")
 
 if __name__ == "__main__":
