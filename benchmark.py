@@ -1,4 +1,9 @@
 import torch
+try:
+    import torch_npu
+except ImportError:
+    pass
+
 import time
 import argparse
 
@@ -7,16 +12,18 @@ def get_device():
         return torch.device('cuda')
     elif torch.backends.mps.is_available():
         return torch.device('mps')
+    elif hasattr(torch, 'npu'):
+        return torch.device('npu')
     else:
         return torch.device('cpu')
 
 def get_device_name(device):
     if device.type == 'cuda':
-        return torch.cuda.get_device_name(device)
-    elif device.type == 'mps':
-        return 'MPS'
+        return f'({torch.cuda.get_device_name(device)})'
+    elif device.type == 'npu':
+        return f'({torch.npu.get_device_name(device)})'
     else:
-        return 'CPU'
+        return ''
 
 def cleanup_device(device):
     """
@@ -26,6 +33,8 @@ def cleanup_device(device):
         torch.cuda.empty_cache()
     elif device.type == 'mps':
         torch.mps.empty_cache()
+    elif device.type == 'npu':
+        torch.npu.empty_cache()
     else:
         pass  # No cleanup needed for CPU
 
@@ -37,6 +46,8 @@ def synchronize_device(device):
         torch.cuda.synchronize(device=device)
     elif device.type == 'mps':
         torch.mps.synchronize()
+    elif device.type == 'npu':
+        torch.npu.synchronize(device=device)
     else:
         pass  # No synchronization needed for CPU
 
@@ -177,7 +188,7 @@ def main():
     data_types = {name: supported_data_types[name] for name in args.types}
 
     device_name = get_device_name(device)
-    print(f"Using backend: {device} ({device_name})\n")
+    print(f"Using backend: {device} {device_name}\n")
 
     for name, dtype in data_types.items():
         print(f"--- {name} Benchmark ---")
@@ -188,13 +199,6 @@ def main():
         except RuntimeError as e:
             tflops = -1
             print(f"Matrix Multiplication failed on {device}: {e}")
-        
-        if device.type == 'cuda':
-            torch.cuda.empty_cache()
-        elif device.type == 'mps':
-            torch.mps.empty_cache()
-        else:
-            pass
         
         try:
             # Memory Bandwidth Benchmark
