@@ -153,7 +153,7 @@ def benchmark_memory_bandwidth(device, dtype, sec=1.0, sz=1e9, all_zeros=False):
     bandwidth_gib_s = total_bytes / (elapsed_time * 1073741824)
     bandwidth_gb_s = total_bytes / (elapsed_time * 1e9)  # Convert to GB/s
     cleanup_device(device)
-    return bandwidth_gib_s, bandwidth_gb_s
+    return bandwidth_gb_s, bandwidth_gib_s
 
 
 def parse_types(value:str):
