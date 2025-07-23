@@ -1,6 +1,6 @@
 # PyTorch GEMM TFLOPS and Memory Bandwidth Benchmark
 
-This Python script uses PyTorch to measure the performance of General Matrix Multiply (GEMM) operations in TFLOPS and memory bandwidth in GB/s on a given hardware device. It supports CPU, CUDA-enabled GPUs, and Apple MPS. This script will **not** likely reflect the peak performance of the hardware, but it can be useful to reflect the actual performance in PyTorch machine learning applications.
+This Python script uses PyTorch to measure the performance of General Matrix Multiply (GEMM) operations in TFLOPS and memory bandwidth in GB/s on a given hardware device. It supports CPU, CUDA-enabled GPUs, Apple MPS, Huawei Ascend, and Moore Threads GPU. This script **may not** reflect the peak performance of the hardware, but it can be useful to reflect the actual performance in PyTorch machine learning applications.
 
 ## Features
 
@@ -12,9 +12,12 @@ This Python script uses PyTorch to measure the performance of General Matrix Mul
 
 ## Requirements
 
-- Python 3.9 or later
+- Python 3.10 or later
 - [PyTorch](https://pytorch.org/get-started/locally/) installed
-- A CUDA-enabled GPU or Apple MPS device (optional)
+- Nvidia GPU (optional)
+- Apple MPS (optional)
+- Huawei Ascend (optional)
+- Moore Threads GPU (optional)
 
 ## Usage
 
